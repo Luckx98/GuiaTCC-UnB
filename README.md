@@ -45,17 +45,61 @@ O projeto combina uma aplicação web com uma pipeline de dados responsável por
 
 ## Executar o projeto
 
-Requisitos: Docker com Docker Compose e acesso à internet.
+Requisito: Docker com Docker Compose. O arquivo `.env` é opcional, porque o `docker-compose.yml` já tem valores padrão. Para mudar algum valor, copie o `.env.example`.
 
 ```bash
-cp .env.example .env
+git clone https://github.com/CA1RO/GuiaTCC-UnB.git
+cd GuiaTCC-UnB
 docker compose up --build
 ```
 
-Depois da inicialização, abra:
+O Compose sobe três serviços, nesta ordem:
 
-- aplicação: <http://localhost:8000>;
-- documentação da API: <http://localhost:8000/docs>.
+1. `postgres`: PostgreSQL 16 com `wal_level=logical`;
+2. `migrate`: aplica as migrações de `alembic/versions/` num banco vazio;
+3. `loader`: carrega as tabelas de referência e os dados do SIH/SUS e do CNES e termina com um resumo das contagens.
+
+### Modos de carga
+
+| Modo | O que carrega | Rede | Tempo aproximado |
+| --- | --- | --- | --- |
+| `amostra` (padrão) | Recorte versionado em `dados/amostra/` (DF, 01/2025) | Não precisa | < 1 min |
+| `completo` | DF e GO de 01/2021 até a última competência publicada, baixados do FTP do DATASUS | Precisa | ~15 min, ~330 MB baixados |
+
+```bash
+MODO=completo docker compose up --build -d
+docker compose logs -f loader      # acompanhar o progresso
+docker compose ps -a               # leitos_loader "Exited (0)" = carga concluída sem falhas
+```
+
+Para limitar o recorte, use as variáveis `UFS`, `COMPETENCIA_INICIO` e `COMPETENCIA_FIM`, no formato `AAAA-MM`:
+
+```bash
+MODO=completo UFS=DF COMPETENCIA_INICIO=2024-01 COMPETENCIA_FIM=2024-12 docker compose up --build
+```
+
+A carga é idempotente: um arquivo já carregado com o mesmo conteúdo é ignorado. Se o FTP cair no meio, basta rodar o mesmo comando de novo. Os arquivos já baixados ficam no volume `leitos_dados_brutos` e não são baixados outra vez.
+
+### Consultar o banco
+
+Conexão: `localhost:5432`, banco `leitos`, usuário `leitos`, senha `leitos`. Se a porta 5432 já estiver em uso, suba com `POSTGRES_PORT=55432 docker compose up --build`.
+
+```bash
+docker compose exec postgres psql -U leitos -d leitos -c \
+  "SELECT fonte, count(*) arquivos, sum(linhas_inseridas) inseridas, sum(linhas_rejeitadas) rejeitadas FROM carga GROUP BY 1"
+```
+
+### Testes
+
+```bash
+docker compose run --rm loader python -m unittest
+```
+
+### Recomeçar do zero
+
+```bash
+docker compose down -v   # apaga o banco e os arquivos baixados
+```
 
 ## Documentação
 

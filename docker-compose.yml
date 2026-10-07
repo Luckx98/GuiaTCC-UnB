@@ -1,36 +1,60 @@
+name: leitos
+
 services:
-  # ── PostgreSQL 16 ─────────────────────────────────────────────────
+  # ── PostgreSQL 16 (origem OLTP) ───────────────────────────────────
+  # wal_level=logical desde a E1 para o CDC (Debezium) da E2.
   postgres:
-    image: docker.io/pgvector/pgvector:pg16
-    container_name: guia_orientador_postgres
+    image: docker.io/library/postgres:16
+    container_name: leitos_postgres
     restart: unless-stopped
+    command: ["postgres", "-c", "wal_level=logical", "-c", "max_replication_slots=4", "-c", "max_wal_senders=4"]
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-guia_orientador}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme_pg_password}
-      POSTGRES_DB: ${POSTGRES_DB:-guia_orientador_db}
+      POSTGRES_USER: ${POSTGRES_USER:-leitos}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-leitos}
+      POSTGRES_DB: ${POSTGRES_DB:-leitos}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-guia_orientador}"]
-      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-leitos} -d ${POSTGRES_DB:-leitos}"]
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 20
 
   # ── Migrações versionadas ──────────────────────────────────
   migrate:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: guia_orientador_migrate
+    build: .
+    container_name: leitos_migrate
     restart: "no"
     command: ["alembic", "upgrade", "head"]
     environment:
-      - DATABASE_URL=postgresql+psycopg://${POSTGRES_USER:-guia_orientador}:${POSTGRES_PASSWORD:-changeme_pg_password}@postgres:5432/${POSTGRES_DB:-guia_orientador_db}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-leitos}:${POSTGRES_PASSWORD:-leitos}@postgres:5432/${POSTGRES_DB:-leitos}
     depends_on:
       postgres:
         condition: service_healthy
 
+  # ── Carga das fontes públicas ──────────────────────────────
+  # MODO=amostra usa o recorte versionado em dados/amostra (sem rede).
+  # MODO=completo baixa do FTP do DATASUS as UFs e anos configurados.
+  loader:
+    build: .
+    container_name: leitos_loader
+    restart: "no"
+    command: ["python", "-m", "loader"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-leitos}:${POSTGRES_PASSWORD:-leitos}@postgres:5432/${POSTGRES_DB:-leitos}
+      MODO: ${MODO:-amostra}
+      UFS: ${UFS:-DF,GO}
+      COMPETENCIA_INICIO: ${COMPETENCIA_INICIO:-2021-01}
+      COMPETENCIA_FIM: ${COMPETENCIA_FIM:-}
+      DIR_BRUTOS: /dados/brutos
+    volumes:
+      - dados_brutos:/dados/brutos
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
 volumes:
   postgres_data:
+  dados_brutos:

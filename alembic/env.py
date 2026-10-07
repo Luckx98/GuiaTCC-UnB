@@ -1,4 +1,4 @@
-"""Configuração do Alembic para migrações do GuiaOrientador-UnB."""
+"""Configuração do Alembic. As migrações são SQL explícito (op.execute)."""
 
 import os
 from logging.config import fileConfig
