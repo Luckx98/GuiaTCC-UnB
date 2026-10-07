@@ -50,6 +50,11 @@ minio_data/
 redis_data/
 postgres_data/
 
+# Arquivos brutos baixados do DATASUS (só o recorte em dados/amostra é versionado)
+dados/brutos/
+*.dbf
+*.part
+
 # Logs
 logs/
 *.log
