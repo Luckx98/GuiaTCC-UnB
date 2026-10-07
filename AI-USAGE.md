@@ -112,3 +112,36 @@ tradução. Registre o que produziu artefato ou mudou uma decisão.
   11 testes, todos passando. Os casos de teste usam valores observados nos
   arquivos reais (CID N18.5, `DT_INTER` de 2008, `DIAG_SECUN` "0000").
 - **Quem revisou:** Cairo Florenço.
+
+### 2026-10-07 — Consultas de caracterização da carga e de histórico da origem
+
+- **Ferramenta:** Claude Code (modelo Claude Opus 5.5), extensão do VS Code.
+- **Onde:** `sql/caracterizacao/` (volume, escrita, represamento, consultas de
+  leitura L1–L6 e `executar.sh`) e `sql/historico/` (consultas H1–H4 e
+  `executar.sh`), com os resultados de 2026-10-07 em `resultados/`.
+- **O que foi pedido:** consultas que medem volume, escrita, leitura e defasagem da origem. 
+  E também, consultas que só são possíveis porque a origem guarda histórico.
+- **O que foi aproveitado:** todas as consultas e os dois scripts. As consultas
+  de leitura foram escolhidas pelo assistente a partir das perguntas que a
+  plataforma deve responder (pontual por hospital, leitos por região, causas,
+  ocupação semanal, permanência e custo, internação fora da UF). Duas correções
+  foram feitas depois da primeira execução: a L4 cortava a última semana de
+  2024 (que entra em 2025) e misturava a região "Central" de GO com a "Central"
+  do DF; a H1 tinha um erro de SQL (`ORDER BY` com apelido de coluna dentro de
+  expressão).
+- **Como foi verificado:** os dois scripts rodaram sobre a carga completa
+  (3,67 milhões de internações) e os resultados foram conferidos contra números
+  já conhecidos. As contagens por fonte batem com a tabela `carga`, e o
+  represamento medido na H3 (76,5% das saídas de jan/2025 do DF conhecidas na
+  primeira competência) é coerente com o da `03_represamento` (65% no mesmo
+  mês, 99,5% em até 3 meses). Os tempos vêm de `EXPLAIN (ANALYZE, BUFFERS)`,
+  3 execuções por consulta, com máquina e configuração do PostgreSQL gravadas
+  no cabeçalho do resultado.
+  **Ressalvas que o texto da E1 precisa carregar:** a ocupação semanal da L4 é
+  uma estimativa bruta (leito cadastrado não é leito operando, internação de
+  zero dia não conta paciente-dia, hospitais de referência distrital caem na
+  Região Central); na H2, 2021 é ano de pandemia e infla o crescimento das
+  internações; na H4, parte das versões de cadastro é ruído da própria fonte
+  (799 versões numa só competência, 12/2022, e 38 estabelecimentos com
+  cadastro que vai e volta).
+- **Quem revisou:** Cairo Florenço.
