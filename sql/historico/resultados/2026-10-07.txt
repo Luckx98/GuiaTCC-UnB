@@ -1,0 +1,121 @@
+# Consultas sobre o histórico da origem — 2026-10-07 13:05:27 -03
+
+================================================================
+== H1_mudanca_de_gestao
+-- H1: hospitais que mudaram de gestão (municipal <-> estadual) e o que aconteceu
+-- com as internações nos 12 meses antes e depois. Pergunta 8.
+--
+-- Só é possível porque estabelecimento_versao guarda cada versão do cadastro.
+-- Num modelo CRUD que sobrescreve, só restaria a gestão atual.
+================================================================
+  cnes   | uf |      municipio       |  mudou_em  | gestao | internacoes_mes_antes | internacoes_mes_depois 
+---------+----+----------------------+------------+--------+-----------------------+------------------------
+ 7743068 | 52 | GOIANIA              | 2021-11-01 | M -> E |                1201.3 |                 1845.3
+ 2338262 | 52 | GOIANIA              | 2021-11-01 | M -> E |                1017.3 |                 1284.8
+ 2339196 | 52 | GOIANIA              | 2021-11-01 | M -> E |                 638.5 |                  683.6
+ 2673932 | 52 | GOIANIA              | 2021-11-01 | M -> E |                 299.3 |                  574.7
+ 2338734 | 52 | GOIANIA              | 2021-11-01 | M -> E |                 479.6 |                  454.4
+ 5419662 | 52 | APARECIDA DE GOIANIA | 2022-04-01 | M -> E |                 431.8 |                  475.6
+ 2339080 | 52 | GOIANIA              | 2021-11-01 | M -> E |                 220.1 |                  266.8
+ 2506661 | 52 | GOIANIA              | 2021-11-01 | M -> E |                 234.8 |                  234.6
+ 2517957 | 52 | GOIANIA              | 2024-06-01 | M -> E |                 160.2 |                  238.8
+ 2519186 | 52 | GOIANIA              | 2024-06-01 | M -> E |                 183.9 |                  194.9
+ 2361779 | 52 | ANAPOLIS             | 2024-07-01 | M -> E |                 162.7 |                  179.1
+ 2659832 | 52 | GOIANIA              | 2024-07-01 | M -> E |                 100.8 |                   75.5
+ 9138625 | 52 | GOIANIA              | 2021-11-01 | M -> E |                   0.0 |                   22.3
+ 2653818 | 52 | GOIANIA              | 2021-11-01 | M -> E |                   0.0 |                   13.2
+ 4840674 | 52 | CATALAO              | 2026-05-01 | M -> E |                   0.0 |                    5.3
+(15 rows)
+
+
+================================================================
+== H2_leitos_e_internacoes_por_regiao
+-- H2: leitos SUS em 01/2021 x 01/2026 e internações em 2021 x 2025, por região de saúde.
+-- Quais regiões perderam leitos enquanto as internações cresceram? Pergunta 2.
+--
+-- Só é possível porque cada competência do CNES-LT é guardada (retrato mensal),
+-- em vez de ser substituída pela mais recente.
+================================================================
+ cod_uf |        regiao_saude        | leitos_2021 | leitos_2026 | var_leitos_pct | internacoes_2021 | internacoes_2025 | var_internacoes_pct 
+--------+----------------------------+-------------+-------------+----------------+------------------+------------------+---------------------
+ 53     | Região de Saúde Centro-Sul |          58 |          58 |            0.0 |             4407 |             3799 |               -13.8
+ 53     | Região de Saúde Norte      |         360 |         375 |            4.2 |            24492 |            24345 |                -0.6
+ 53     | Região de Saúde Central    |        2412 |        2516 |            4.3 |            84134 |            95363 |                13.3
+ 53     | Região de Saúde Sul        |         915 |         970 |            6.0 |            42389 |            48140 |                13.6
+ 53     | Região de Saúde Oeste      |         670 |         739 |           10.3 |            29064 |            28197 |                -3.0
+ 53     | Região de Saúde Leste      |         231 |         260 |           12.6 |            13344 |            16171 |                21.2
+ 53     | Região de Saúde Sudoeste   |         641 |         729 |           13.7 |            34706 |            30167 |               -13.1
+ 52     | São Patrício I             |         611 |         437 |          -28.5 |             7337 |            12097 |                64.9
+ 52     | Pirineus                   |         824 |         726 |          -11.9 |            25428 |            36642 |                44.1
+ 52     | São Patrício II            |         301 |         271 |          -10.0 |             6879 |             9827 |                42.9
+ 52     | Sudoeste II                |         489 |         459 |           -6.1 |             8364 |            12331 |                47.4
+ 52     | Nordeste I                 |         104 |         100 |           -3.8 |              681 |             1068 |                56.8
+ 52     | Sudoeste I                 |         893 |         873 |           -2.2 |            25560 |            36765 |                43.8
+ 52     | Oeste I                    |         271 |         265 |           -2.2 |             2953 |             4381 |                48.4
+ 52     | Centro Sul                 |        1620 |        1589 |           -1.9 |            36349 |            47649 |                31.1
+ 52     | Rio Vermelho               |         415 |         407 |           -1.9 |             6563 |             9904 |                50.9
+ 52     | Entorno Norte              |         201 |         201 |            0.0 |             7423 |            11449 |                54.2
+ 52     | Norte                      |         307 |         309 |            0.7 |             6224 |            13374 |               114.9
+ 52     | Central                    |        4693 |        4859 |            3.5 |           163414 |           188736 |                15.5
+ 52     | Nordeste II                |         172 |         185 |            7.6 |             5112 |             5200 |                 1.7
+ 52     | Entorno Sul                |         431 |         498 |           15.5 |             9030 |            15725 |                74.1
+ 52     | Sul                        |         442 |         565 |           27.8 |            13218 |            22468 |                70.0
+ 52     | Estrada de Ferro           |         599 |         842 |           40.6 |            11395 |            12592 |                10.5
+ 52     | Oeste II                   |         183 |         260 |           42.1 |             5331 |             7601 |                42.6
+ 52     | Serra da Mesa              |         220 |         552 |          150.9 |             4547 |            22155 |               387.2
+(25 rows)
+
+
+================================================================
+== H3_o_que_se_sabia_em_cada_mes
+-- H3: quantas saídas de janeiro/2025 a base conhecia ao final de cada competência.
+-- Responde "o que a Central de Regulação via naquela época" e mostra o represamento
+-- de um mês concreto.
+--
+-- Só é possível porque cada internação guarda a competência em que chegou
+-- (data de processamento) além da data do evento. Se a carga sobrescrevesse
+-- pela AIH, não haveria como reconstruir a base de uma data passada.
+================================================================
+ uf | base_ao_final_de | chegaram_nesta_competencia | conhecidas_ate_entao | pct_do_total_atual 
+----+------------------+----------------------------+----------------------+--------------------
+ DF | 2025-01-01       |                      14970 |                14970 |               76.5
+ DF | 2025-02-01       |                       3333 |                18303 |               93.5
+ DF | 2025-03-01       |                        621 |                18924 |               96.7
+ DF | 2025-04-01       |                        646 |                19570 |              100.0
+ DF | 2025-05-01       |                          2 |                19572 |              100.0
+ GO | 2025-01-01       |                      26260 |                26260 |               70.2
+ GO | 2025-02-01       |                       6287 |                32547 |               87.0
+ GO | 2025-03-01       |                       3247 |                35794 |               95.7
+ GO | 2025-04-01       |                       1468 |                37262 |               99.6
+ GO | 2025-05-01       |                         39 |                37301 |               99.7
+ GO | 2025-06-01       |                         98 |                37399 |              100.0
+(11 rows)
+
+
+================================================================
+== H4_mudancas_de_cadastro
+-- H4: o que muda no cadastro dos estabelecimentos entre competências.
+-- Mede quanto histórico o CNES-ST gera e expõe ruído da própria fonte.
+-- Mudanças por atributo (uma versão pode mudar mais de um atributo).
+-- Competências com mais versões novas: picos indicam reclassificação em massa na fonte.
+-- Estabelecimentos cujo cadastro "vai e volta" (A -> B -> A na natureza jurídica).
+================================================================
+ versoes_novas | tipo_unidade | natureza_juridica | atende_urgencia | vinculo_sus | atende_internacao | mantenedora | tipo_gestao | municipio 
+---------------+--------------+-------------------+-----------------+-------------+-------------------+-------------+-------------+-----------
+          4871 |         1856 |              1809 |             560 |         550 |               134 |         115 |          44 |         0
+(1 row)
+
+ competencia_inicio | versoes_novas 
+--------------------+---------------
+ 2022-12-01         |           799
+ 2025-08-01         |           250
+ 2021-03-01         |           130
+ 2023-01-01         |           130
+ 2022-07-01         |           124
+(5 rows)
+
+ estabelecimentos_com_ida_e_volta 
+----------------------------------
+                               38
+(1 row)
+
