@@ -44,12 +44,6 @@ site/
 # Docker
 docker-compose.override.yml
 
-# Data directories (created by Docker volumes)
-data/
-minio_data/
-redis_data/
-postgres_data/
-
 # Arquivos brutos baixados do DATASUS (só o recorte em dados/amostra é versionado)
 dados/brutos/
 *.dbf

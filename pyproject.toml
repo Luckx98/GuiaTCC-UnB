@@ -1,11 +1,11 @@
 [project]
-name = "guia-orientador-unb"
+name = "leitos-sus-df"
 version = "0.1.0"
-description = "Sistema para auxiliar alunos da UnB a encontrar orientadores e temas de TCC via busca semântica (RAG)"
-requires-python = ">=3.12"
+description = "Plataforma de dados sobre ocupação de leitos SUS no DF: carga do SIH/SUS e do CNES para uma origem OLTP insert-only"
+requires-python = ">=3.11"
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py311"
 line-length = 120
 
 [tool.ruff.lint]
@@ -13,4 +13,3 @@ select = ["E", "F", "I", "W"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-asyncio_mode = "auto"
