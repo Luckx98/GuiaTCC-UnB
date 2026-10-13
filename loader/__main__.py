@@ -20,6 +20,7 @@ from loader import cnes, sih
 from loader.carga import Arquivo, carregar_arquivo
 from loader.config import DIR_AMOSTRA, DIR_REFERENCIA, Config
 from loader.ftp import ClienteFTP
+from loader.qualidade import verificar
 from loader.referencias import carregar_referencias
 
 log = logging.getLogger("loader")
@@ -76,19 +77,6 @@ def resumo(conexao: psycopg.Connection) -> None:
     for tabela in ("estabelecimento", "estabelecimento_versao", "leito", "internacao", "carga_rejeicao"):
         total = conexao.execute(f"SELECT count(*) FROM {tabela}").fetchone()[0]
         log.info("%-24s %10d linhas", tabela, total)
-    sem_regiao = conexao.execute(
-        """
-        SELECT DISTINCT i.cnes FROM internacao i
-        WHERE i.municipio_estabelecimento = '530010'
-          AND NOT EXISTS (SELECT 1 FROM estabelecimento_regiao_df r WHERE r.cnes = i.cnes)
-        ORDER BY 1
-        """
-    ).fetchall()
-    if sem_regiao:
-        log.warning(
-            "CNES do DF sem região de saúde em dados/referencia/estabelecimento_regiao_saude_df.csv: %s",
-            ", ".join(c for (c,) in sem_regiao),
-        )
 
 
 def main() -> int:
@@ -115,11 +103,13 @@ def main() -> int:
                 falhas += 1
                 log.exception("falha ao carregar %s", arquivo.caminho.name)
         resumo(conexao)
+        erros_qualidade = verificar(conexao)
 
     if falhas:
         log.error("%d arquivo(s) falharam; ver tabela carga (status = 'falhou')", falhas)
-        return 1
-    return 0
+    if erros_qualidade:
+        log.error("%d verificação(ões) de qualidade com erro", erros_qualidade)
+    return 1 if falhas or erros_qualidade else 0
 
 
 def _processar(conexao: psycopg.Connection, id_carga: int, arquivo: Arquivo):

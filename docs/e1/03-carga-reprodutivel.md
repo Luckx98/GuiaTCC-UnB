@@ -51,12 +51,35 @@ FROM carga_rejeicao r JOIN carga c USING (id_carga)
 GROUP BY 1, 2, 3 ORDER BY 1, 2;
 ```
 
+## Qualidade dos dados carregados
+
+No fim de toda carga, o loader roda 13 verificações sobre o que está no banco (`loader/qualidade.py`). Uma verificação com **erro** faz o loader terminar com código 1. Um **alerta** só é registrado no log.
+
+| Código | Verificação | Severidade | Resultado na carga completa |
+| --- | --- | --- | ---: |
+| Q01 | carga de arquivo que falhou e nunca foi concluída | erro | 0 |
+| Q02 | competência faltando na série de uma fonte e UF | erro | 0 |
+| Q03 | arquivo com mais de 1% das linhas rejeitadas | erro | 0 |
+| Q04 | internação contada duas vezes nas visões vigentes | erro | 0 |
+| Q05 | internação com saída depois do mês da competência | erro | 0 |
+| Q06 | hospital do DF com internação e sem região de saúde | erro | 0 |
+| Q07 | leitos SUS acima dos leitos existentes | alerta | 0 |
+| Q08 | leitos SUS + não SUS diferente dos existentes | alerta | 0 |
+| Q09 | dias de permanência incoerentes com as datas (internação normal) | alerta | 0 |
+| Q10 | internação em hospital sem leito SUS no mês da saída | alerta | 0 |
+| Q11 | competência do SIH com menos de 60% da mediana da UF | alerta | 0 |
+| Q12 | idade acima de 110 anos | alerta | 0 |
+| Q13 | internação com valor total zero | alerta | 7.253 |
+
+As verificações levam cerca de 12 s sobre a carga completa. Elas também confirmam características da fonte que a análise usa. Por exemplo, a Q09 mostra que, nas 3,6 milhões de internações normais, os dias de permanência sempre batem com as datas; a Q13 mostra que 0,2% das internações têm valor zero, o que deve ser excluído do custo médio. Uma carga com falha simulada foi usada para confirmar que a Q01 interrompe o processo com código 1.
+
 ## Verificação
 
 ```bash
 docker compose exec postgres psql -U leitos -d leitos -c \
   "SELECT fonte, count(*) arquivos, sum(linhas_inseridas) inseridas, sum(linhas_rejeitadas) rejeitadas FROM carga GROUP BY 1"
-docker compose run --rm loader python -m unittest   # 11 testes do loader
+docker compose run --rm loader python -m unittest          # 14 testes do loader
+docker compose run --rm loader python -m loader.qualidade  # 13 verificações de qualidade
 ```
 
 A reprodutibilidade foi testada com `git clone` do repositório numa pasta nova, sem `.env`. As migrações rodaram, a amostra carregou e o loader terminou com código 0.

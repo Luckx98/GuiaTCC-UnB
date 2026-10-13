@@ -1,46 +1,47 @@
-# GuiaOrientador-UnB
+# Leitos SUS-DF
 
-O **GuiaOrientador-UnB** é uma plataforma de apoio à escolha de temas e orientadores de trabalhos acadêmicos na Universidade de Brasília. O projeto busca reduzir a distância entre estudantes e docentes, reunindo informações acadêmicas que normalmente ficam dispersas entre departamentos, programas e diferentes fontes institucionais.
+**A capacidade de leitos do SUS acompanha a demanda por internação?**
 
-O público principal são estudantes que estão definindo um tema de TCC ou monografia, procurando orientação acadêmica ou buscando oportunidades de iniciação científica.
+Plataforma de dados do Grupo 01 de Banco de Dados 2 (UnB/FCTE, 2026/2). Ela cruza a capacidade de leitos do SUS (CNES) com as internações pagas pelo SUS (SIH/SUS) no Distrito Federal e em Goiás, para mostrar onde e quando a ocupação passa do limite.
 
-## Visão geral
+## Pergunta de gestão
 
-O estudante informa um tema ou uma área de interesse. A plataforma organiza dados públicos sobre docentes e programas acadêmicos para ajudar a identificar pessoas e áreas relacionadas à busca.
+> Entre 2021 e 2025, em quais semanas do ano a ocupação estimada de leitos SUS (paciente-dia ÷ leitos cadastrados) ultrapassou 85% em cada região de saúde do DF, e quais causas de internação (CID) concentravam esse excesso?
 
-O projeto combina uma aplicação web com uma pipeline de dados responsável por coletar, tratar, validar e armazenar as informações usadas nas consultas.
+**Persona:** gestor da Secretaria de Saúde do DF e da Central de Regulação de Leitos.
 
-## Como funciona
+## Pipeline de dados
 
-1. Dados acadêmicos públicos são obtidos de fontes oficiais.
-2. A pipeline seleciona os campos necessários, normaliza os registros e evita duplicações.
-3. As informações são armazenadas em um banco relacional versionado por migrações.
-4. A API disponibiliza os dados para a interface e para os módulos de busca.
-5. O estudante consulta docentes e áreas relacionadas ao seu tema de interesse.
+```text
+FONTES ──► MIGRAÇÕES ──► CARGA ──► BANCO DE ORIGEM
+```
+
+- **FONTES:** arquivos públicos do DATASUS com as internações (SIH/SUS) e os estabelecimentos e leitos (CNES) do DF e de Goiás, de 2021 até a última competência publicada, mais as tabelas de CID-10, municípios e regiões de saúde. Um recorte versionado em `dados/amostra/` permite subir a plataforma sem rede.
+- **MIGRAÇÕES:** o PostgreSQL sobe e o esquema é criado a partir de um banco vazio, em ordem, antes de qualquer carga.
+- **CARGA:** o loader baixa os arquivos, valida cada linha e grava um arquivo por transação. Arquivos já carregados são ignorados; linhas inválidas ficam registradas com o motivo.
+- **BANCO DE ORIGEM:** PostgreSQL insert-only, que nunca sobrescreve: guarda as versões do cadastro, os leitos mês a mês e, em cada internação, a data do evento, a competência e a data de carga. Fica pronto para a captura de mudanças (CDC).
 
 ## Componentes
 
 | Componente | Responsabilidade |
 | --- | --- |
-| Frontend | Interface de consulta e interação com o estudante |
-| FastAPI | API e regras da aplicação |
-| PostgreSQL | Cadastro relacional de docentes, programas e demais entidades |
-| pgvector | Suporte à evolução da busca por similaridade semântica |
-| Pipeline de dados | Download, transformação, validação e carga das fontes públicas |
-| Alembic | Versionamento e execução das mudanças do banco |
-| Docker Compose | Inicialização reproduzível dos serviços |
+| PostgreSQL 16 | banco de origem insert-only, com `wal_level=logical` |
+| Alembic | migrações versionadas em `alembic/versions/` |
+| Loader (Python 3.11) | download do FTP do DATASUS, validação e carga em `loader/` |
+| Docker Compose | sobe banco, migrações e carga com um comando |
+| MkDocs Material | documentação publicada no GitHub Pages |
 
 ## Equipe
 
-| Nome                              | Papel no pipeline de dados                              |
-| --------------------------------- | ------------------------------------------------------- |
-| Lucas Macedo Barboza              | Integrante                                              |
-| Caetano Santos Lucio              | Engenharia de dados, embeddings e runtime do assistente |
-| Cairo Florenço                    | Integrante                                              |
-| Leonardo Sobrinho                 | Integrante                                              |
-| Carlos Eduardo Mendes de Mesquita | Integrante                                              |
-| Bruna                             | Integrante                                              |
-| Lais                              | Integrante                                              |
+| Nome |
+| --- |
+| Lucas Macedo Barboza |
+| Caetano Santos Lucio |
+| Cairo Florenço |
+| Leonardo Sobrinho |
+| Carlos Eduardo Mendes de Mesquita |
+| Bruna |
+| Lais |
 
 
 ## Executar o projeto
@@ -89,11 +90,14 @@ docker compose exec postgres psql -U leitos -d leitos -c \
   "SELECT fonte, count(*) arquivos, sum(linhas_inseridas) inseridas, sum(linhas_rejeitadas) rejeitadas FROM carga GROUP BY 1"
 ```
 
-### Testes
+### Testes e qualidade dos dados
 
 ```bash
-docker compose run --rm loader python -m unittest
+docker compose run --rm loader python -m unittest          # testes do loader
+docker compose run --rm loader python -m loader.qualidade  # verificações sobre os dados carregados
 ```
+
+As verificações de qualidade também rodam automaticamente no fim de toda carga. Uma verificação com erro faz o loader terminar com código 1.
 
 ### Recomeçar do zero
 
@@ -103,7 +107,18 @@ docker compose down -v   # apaga o banco e os arquivos baixados
 
 ## Documentação
 
-A documentação completa do projeto, das entregas da disciplina e das decisões de modelagem está no [GitHub Pages do GuiaOrientador-UnB](https://luckx98.github.io/GuiaTCC-UnB/).
+A documentação completa está no [GitHub Pages do Leitos SUS-DF](https://luckx98.github.io/GuiaTCC-UnB/).
+
+| Tema | Página |
+| --- | --- |
+| Domínio e pergunta de gestão | [docs/e1/01-dominio-e-pergunta.md](docs/e1/01-dominio-e-pergunta.md) |
+| Esquema e migrações | [docs/e1/02-esquema-e-migracoes.md](docs/e1/02-esquema-e-migracoes.md) |
+| Carga reprodutível | [docs/e1/03-carga-reprodutivel.md](docs/e1/03-carga-reprodutivel.md) |
+| Volume | [docs/e1/04-volume.md](docs/e1/04-volume.md) |
+| Caracterização da carga | [docs/e1/05-caracterizacao-da-carga.md](docs/e1/05-caracterizacao-da-carga.md) |
+| Histórico da origem | [docs/e1/06-historico-da-origem.md](docs/e1/06-historico-da-origem.md) |
+| ADR 0001 — origem insert-only | [docs/adr/0001-origem-insert-only-versionada-por-competencia.md](docs/adr/0001-origem-insert-only-versionada-por-competencia.md) |
+| Uso de IA | [AI-USAGE.md](AI-USAGE.md) |
 
 Para visualizar o site localmente:
 
@@ -119,12 +134,23 @@ Abra <http://127.0.0.1:8000>. O MkDocs atualiza a página automaticamente quando
 ## Estrutura principal
 
 ```text
-alembic/      migrações do banco
-docs/         documentação publicada pelo MkDocs
-frontend/     interface web
-scripts/      cargas e medições reproduzíveis
-src/api/      rotas e serviços da API
-src/db/       modelos e acesso ao banco
-src/pipeline/ ingestão e transformação dos dados
-tests/        testes automatizados
+alembic/versions/   migrações do banco (0001–0006)
+loader/             download, validação e carga das fontes do DATASUS
+tests/              testes do loader
+dados/amostra/      recorte versionado (DF, 01/2025) para subir sem rede
+dados/referencia/   região de saúde dos hospitais do DF (tabela curada)
+sql/caracterizacao/ medição de volume, escrita, leitura e defasagem
+sql/historico/      consultas que dependem do histórico da origem
+sql/adr/            medição das alternativas do ADR 0001
+docs/               documentação publicada pelo MkDocs
 ```
+
+## Fontes e licença dos dados
+
+- **SIH/SUS — AIH reduzida (RD)** e **CNES — estabelecimentos (ST) e leitos (LT)**: Ministério da Saúde, DATASUS. FTP público: `ftp://ftp.datasus.gov.br/dissemin/publicos/`.
+- **Tabelas auxiliares** (CID-10, municípios, regiões de saúde): DATASUS, pacote `TAB_SIH.zip`.
+- **Portal de Dados Abertos do SUS**: <https://dadosabertos.saude.gov.br/>.
+
+Os dados do Portal de Dados Abertos do SUS são publicados sob a licença [Creative Commons Atribuição-SemDerivações 3.0](https://creativecommons.org/licenses/by-nd/3.0/deed.pt_BR). Este repositório publica código e agregados, cita a fonte e não republica a base modificada. Os arquivos brutos não são versionados, exceto o recorte de teste em `dados/amostra/`: três arquivos `.dbc` originais e um pacote com três tabelas do `TAB_SIH.zip`, todos sem alteração de conteúdo.
+
+Os dados de internação são dados de saúde (LGPD, art. 5º, II). A origem não grava data de nascimento, CEP nem CPF, e a plataforma publica apenas agregados.
