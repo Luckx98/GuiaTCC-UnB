@@ -1,8 +1,8 @@
 site_name: Leitos SUS-DF
 site_description: Plataforma de dados sobre ocupação de leitos SUS no DF (Banco de Dados 2, UnB)
-site_url: https://luckx98.github.io/GuiaTCC-UnB/
-repo_url: https://github.com/Luckx98/GuiaTCC-UnB
-repo_name: Luckx98/GuiaTCC-UnB
+site_url: https://luckx98.github.io/Leitos-SUS-DF/
+repo_url: https://github.com/Luckx98/Leitos-SUS-DF
+repo_name: Luckx98/Leitos-SUS-DF
 edit_uri: edit/main/docs/
 
 theme:

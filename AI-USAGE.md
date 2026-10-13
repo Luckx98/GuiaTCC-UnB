@@ -175,7 +175,8 @@ tradução. Registre o que produziu artefato ou mudou uma decisão.
 - **Ferramenta:** Claude Code (modelo Claude Opus 5.5), extensão do VS Code.
 - **Onde:** `pyproject.toml`, `alembic.ini`, `.github/workflows/pages.yml`,
   `.gitignore` (commit `a0f3dbf`); troca do repositório oficial para
-  `Luckx98/GuiaTCC-UnB` nos links de README, docs e `mkdocs.yml`.
+  `Luckx98/GuiaTCC-UnB` nos links de README, docs e `mkdocs.yml` (depois
+  renomeado para `Luckx98/Leitos-SUS-DF`).
 - **O que foi pedido:** tirar da configuração os restos do tema
   GuiaOrientador/CAPES e atualizar o endereço do repositório depois da troca
   de dono.

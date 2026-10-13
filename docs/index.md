@@ -39,8 +39,8 @@ FONTES ──► MIGRAÇÕES ──► CARGA ──► BANCO DE ORIGEM
 ## Executar
 
 ```bash
-git clone https://github.com/Luckx98/GuiaTCC-UnB.git
-cd GuiaTCC-UnB
+git clone https://github.com/Luckx98/Leitos-SUS-DF.git
+cd Leitos-SUS-DF
 docker compose up --build
 ```
 
@@ -48,14 +48,14 @@ O README do repositório traz o modo de carga completa, as consultas de verifica
 
 ## Equipe
 
-| Nome |
-| --- |
-| Lucas Macedo Barboza |
-| Caetano Santos Lucio |
-| Cairo Florenço |
-| Leonardo Sobrinho |
-| Carlos Eduardo Mendes de Mesquita |
-| Bruna |
-| Lais |
+| Nome | Matrícula |
+| --- | --- |
+| Lucas Macedo Barboza | 190091720 |
+| Caetano Santos Lucio | 180144979 |
+| Cairo Florenço | 222014975 |
+| Leonardo Sobrinho | 200022199 |
+| Carlos Eduardo Mendes de Mesquita | 190085584 |
+| Bruna de Lima | 211041105 |
+| Lais Cecília | 211029512 |
 
-O código-fonte está no [repositório do projeto](https://github.com/Luckx98/GuiaTCC-UnB).
+O código-fonte está no [repositório do projeto](https://github.com/Luckx98/Leitos-SUS-DF).

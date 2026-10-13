@@ -3,8 +3,8 @@
 Um comando cria o banco, aplica as migrações e carrega os dados, sem passo manual nem arquivo baixado à mão:
 
 ```bash
-git clone https://github.com/Luckx98/GuiaTCC-UnB.git
-cd GuiaTCC-UnB
+git clone https://github.com/Luckx98/Leitos-SUS-DF.git
+cd Leitos-SUS-DF
 docker compose up --build
 ```
 

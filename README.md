@@ -33,15 +33,15 @@ FONTES ──► MIGRAÇÕES ──► CARGA ──► BANCO DE ORIGEM
 
 ## Equipe
 
-| Nome |
-| --- |
-| Lucas Macedo Barboza |
-| Caetano Santos Lucio |
-| Cairo Florenço |
-| Leonardo Sobrinho |
-| Carlos Eduardo Mendes de Mesquita |
-| Bruna |
-| Lais |
+| Nome | Matrícula |
+| --- | --- |
+| Lucas Macedo Barboza | 190091720 |
+| Caetano Santos Lucio | 180144979 |
+| Cairo Florenço | 222014975 |
+| Leonardo Sobrinho | 200022199 |
+| Carlos Eduardo Mendes de Mesquita | 190085584 |
+| Bruna de Lima | 211041105 |
+| Lais Cecília | 211029512 |
 
 
 ## Executar o projeto
@@ -49,8 +49,8 @@ FONTES ──► MIGRAÇÕES ──► CARGA ──► BANCO DE ORIGEM
 Requisito: Docker com Docker Compose. O arquivo `.env` é opcional, porque o `docker-compose.yml` já tem valores padrão. Para mudar algum valor, copie o `.env.example`.
 
 ```bash
-git clone https://github.com/Luckx98/GuiaTCC-UnB.git
-cd GuiaTCC-UnB
+git clone https://github.com/Luckx98/Leitos-SUS-DF.git
+cd Leitos-SUS-DF
 docker compose up --build
 ```
 
@@ -107,7 +107,7 @@ docker compose down -v   # apaga o banco e os arquivos baixados
 
 ## Documentação
 
-A documentação completa está no [GitHub Pages do Leitos SUS-DF](https://luckx98.github.io/GuiaTCC-UnB/).
+A documentação completa está no [GitHub Pages do Leitos SUS-DF](https://luckx98.github.io/Leitos-SUS-DF/).
 
 | Tema | Página |
 | --- | --- |

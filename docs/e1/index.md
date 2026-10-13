@@ -13,7 +13,7 @@ A E1 coloca de pé o sistema de origem do Leitos SUS-DF: um PostgreSQL com esque
 | Caracterização da carga (passo 1) | [Caracterização da carga](05-caracterizacao-da-carga.md) | `sql/caracterizacao/` |
 | Como a origem trata histórico | [Histórico da origem](06-historico-da-origem.md) | `sql/historico/` |
 | ADR da modelagem da origem | [ADR 0001](../adr/0001-origem-insert-only-versionada-por-competencia.md) | `sql/adr/0001_medicao.sql` |
-| README para subir com Docker Compose | [README](https://github.com/Luckx98/GuiaTCC-UnB#executar-o-projeto) | — |
+| README para subir com Docker Compose | [README](https://github.com/Luckx98/Leitos-SUS-DF#executar-o-projeto) | — |
 
 ## Resultado em números
 
