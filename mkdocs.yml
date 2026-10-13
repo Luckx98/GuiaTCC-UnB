@@ -37,3 +37,5 @@ nav:
       - Caracterização da carga: e1/05-caracterizacao-da-carga.md
       - Histórico da origem: e1/06-historico-da-origem.md
       - ADR 0001: adr/0001-origem-insert-only-versionada-por-competencia.md
+  - Diário:
+      - Semana de 05/10: diario/2026-10-05.md

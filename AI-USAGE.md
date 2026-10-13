@@ -145,3 +145,45 @@ tradução. Registre o que produziu artefato ou mudou uma decisão.
   (799 versões numa só competência, 12/2022, e 38 estabelecimentos com
   cadastro que vai e volta).
 - **Quem revisou:** Cairo Florenço.
+
+### 2026-10-13 — Verificações de qualidade dos dados carregados
+
+- **Ferramenta:** Claude Code (modelo Claude Opus 5.5), extensão do VS Code.
+- **Onde:** `loader/qualidade.py`, `loader/__main__.py`,
+  `tests/test_qualidade.py`, `docs/e1/03-carga-reprodutivel.md` e `README.md`
+  (commit `fb8af72`).
+- **O que foi pedido:** verificações sobre os dados já carregados, para
+  fortalecer o critério de qualidade e testes de dados.
+- **O que foi aproveitado:** as 13 verificações (6 de erro, 7 de alerta) e a
+  integração no fim do loader, que termina com código 1 se houver erro. As
+  regras foram escolhidas depois de medir cada uma sobre a carga completa, para
+  separar o que é erro de carga do que é característica da fonte. O aviso de
+  "hospital do DF sem região" que ficava no resumo do loader virou a
+  verificação Q06. A primeira versão da Q10 levava 2 min 18 s; foi reescrita
+  (agregação por hospital e mês antes do cruzamento) e passou a menos de 1 s.
+- **Como foi verificado:** sobre a carga completa, 12 verificações sem
+  violação e 1 alerta esperado (7.253 internações com valor zero), em 12 s.
+  Num ambiente limpo com a amostra, `docker compose up` rodou as verificações
+  e o loader terminou com código 0. Com uma carga marcada como falhou inserida
+  de propósito num banco descartável, a Q01 acusou o erro e o comando terminou
+  com código 1. Três testes novos protegem a lista de verificações (14 testes
+  no total, todos passando).
+- **Quem revisou:** Cairo Florenço.
+
+### 2026-10-13 — Remoção de nomes do tema antigo na configuração
+
+- **Ferramenta:** Claude Code (modelo Claude Opus 5.5), extensão do VS Code.
+- **Onde:** `pyproject.toml`, `alembic.ini`, `.github/workflows/pages.yml`,
+  `.gitignore` (commit `a0f3dbf`); troca do repositório oficial para
+  `Luckx98/GuiaTCC-UnB` nos links de README, docs e `mkdocs.yml`.
+- **O que foi pedido:** tirar da configuração os restos do tema
+  GuiaOrientador/CAPES e atualizar o endereço do repositório depois da troca
+  de dono.
+- **O que foi aproveitado:** tudo. O `pyproject.toml` passou a declarar Python
+  3.11, alinhado com a imagem Docker; o workflow do Pages deixou de publicar a
+  partir da branch antiga `entrega-1`.
+- **Como foi verificado:** migração rodada no banco existente (nada a aplicar),
+  14 testes passando, `pyproject.toml` e workflow lidos sem erro pelos
+  leitores de TOML e YAML, e busca pelos termos do tema antigo sem ocorrências
+  fora do nome do repositório.
+- **Quem revisou:** Cairo Florenço.
