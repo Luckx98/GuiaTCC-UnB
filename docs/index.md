@@ -1,129 +1,61 @@
-# GuiaOrientador-UnB
+# Leitos SUS-DF
 
-## Um ponto de partida para encontrar temas e orientação acadêmica na UnB
+## A capacidade de leitos acompanha a demanda?
 
-O **GuiaOrientador-UnB** é uma plataforma de apoio à escolha de temas e orientadores de trabalhos acadêmicos na Universidade de Brasília. O projeto organiza informações acadêmicas para ajudar estudantes a descobrir docentes, programas e áreas relacionados aos assuntos que pretendem desenvolver.
+O **Leitos SUS-DF** é a plataforma de dados do Grupo 01 de Banco de Dados 2 (UnB/FCTE, 2026/2). Ela cruza a capacidade de leitos do SUS (CNES) com a demanda por internação (SIH/SUS) para mostrar onde e quando a ocupação passa do limite, no Distrito Federal e em Goiás.
 
 ## Problema
 
-Estudantes que estão iniciando um TCC, uma monografia ou uma atividade de iniciação científica nem sempre sabem quais docentes atuam na área que desejam pesquisar. As informações existem, mas costumam estar distribuídas entre departamentos, programas de pós-graduação, currículos e portais institucionais.
+Capacidade e demanda são acompanhadas em sistemas separados. A falta de leito, principalmente nos picos sazonais (doenças respiratórias no inverno, dengue no verão), só é percebida quando já está acontecendo.
 
-Essa dispersão faz com que a escolha de um tema ou orientador dependa, muitas vezes, do conhecimento informal sobre quem pesquisa determinado assunto dentro da universidade.
+## Pergunta de gestão
 
-## Proposta
+> Entre 2021 e 2025, em quais semanas do ano a ocupação estimada de leitos SUS (paciente-dia ÷ leitos cadastrados) ultrapassou 85% em cada região de saúde do DF, e quais causas de internação (CID) concentravam esse excesso?
 
-O GuiaOrientador reúne e estrutura dados acadêmicos públicos para aproximar três elementos:
+**Persona:** gestor da Secretaria de Saúde do DF e da Central de Regulação de Leitos.
 
-1. o tema ou a área de interesse do estudante;
-2. os docentes que atuam em áreas relacionadas;
-3. os programas e contextos acadêmicos nos quais esses docentes trabalham.
+## Fontes
 
-O objetivo é oferecer um ponto de partida confiável para que a busca por orientação seja mais informada, reproduzível e menos dependente de contatos prévios dentro da universidade.
+| Fonte | Conteúdo |
+| --- | --- |
+| SIH/SUS (AIH reduzida) | uma linha por internação paga pelo SUS, publicada mensalmente |
+| CNES (estabelecimentos e leitos) | cadastro de estabelecimentos e leitos por tipo, retrato mensal |
+| Tabelas auxiliares do DATASUS | CID-10, municípios e regiões de saúde |
 
-## Público
-
-O público principal são estudantes da UnB que estejam:
-
-- definindo um tema de TCC ou monografia;
-- procurando orientação acadêmica;
-- buscando oportunidades de PIBIC ou PIBITI;
-- explorando áreas de pesquisa fora do próprio departamento.
-
-## Como o projeto funciona
-
-1. Dados acadêmicos públicos são obtidos de fontes oficiais.
-2. A pipeline seleciona os campos necessários, normaliza os registros e evita duplicações.
-3. As informações são armazenadas em um banco relacional versionado por migrações.
-4. A API disponibiliza os dados para a interface e para os módulos de busca.
-5. O estudante informa um tema ou uma área de interesse.
-6. A plataforma apresenta docentes, programas e áreas relacionados à consulta.
+Os dados vêm do FTP público do DATASUS e do Portal de Dados Abertos do SUS, sob licença Creative Commons Atribuição-SemDerivações 3.0.
 
 ## Pipeline de dados
 
 ```text
-Fonte pública -> Ingestão -> Transformação -> Validação -> Banco -> API -> Interface
+FONTES ──► MIGRAÇÕES ──► CARGA ──► BANCO DE ORIGEM
 ```
 
-A pipeline foi projetada para permitir cargas reproduzíveis e idempotentes. Isso significa que o ambiente pode ser reconstruído a partir de um banco vazio e que a repetição de uma carga não deve criar registros duplicados.
+- **FONTES:** arquivos públicos do DATASUS com as internações (SIH/SUS) e os estabelecimentos e leitos (CNES) do DF e de Goiás, de 2021 até a última competência publicada, mais as tabelas de CID-10, municípios e regiões de saúde. Um recorte versionado no repositório permite subir a plataforma sem rede.
+- **MIGRAÇÕES:** o Docker Compose sobe o PostgreSQL e cria o esquema a partir de um banco vazio, em ordem, antes de qualquer carga.
+- **CARGA:** o loader baixa os arquivos, valida cada linha e grava um arquivo por transação. Arquivos já carregados são ignorados, então a carga pode ser repetida ou retomada; linhas inválidas ficam registradas com o motivo.
+- **BANCO DE ORIGEM:** PostgreSQL insert-only, que nunca sobrescreve: guarda as versões do cadastro, os leitos mês a mês e, em cada internação, a data do evento, a competência e a data de carga. Fica pronto para a captura de mudanças (CDC).
 
-Todos os integrantes participam das etapas de escolha das fontes, modelagem, implementação, validação, documentação e revisão.
 
-## Arquitetura
-
-O GuiaOrientador é organizado em serviços independentes executados pelo Docker Compose.
-
-```text
-Fontes públicas
-      |
-      v
-Pipeline de dados ---> PostgreSQL + pgvector
-                            |
-                            v
-                         FastAPI
-                            |
-                            v
-                         Frontend
-```
-
-### Componentes
-
-| Componente | Responsabilidade |
-| --- | --- |
-| Frontend | Interface de consulta e interação com o estudante |
-| FastAPI | API, validações e regras da aplicação |
-| PostgreSQL | Dados relacionais do domínio |
-| pgvector | Estrutura para evolução da busca por similaridade |
-| Redis | Cache e apoio às sessões da aplicação |
-| SeaweedFS | Armazenamento de objetos compatível com S3 |
-| Alembic | Versionamento do esquema físico |
-| Pipeline de dados | Download, transformação, validação e carga das fontes |
-
-### Princípios
-
-- ambiente reproduzível a partir de um banco vazio;
-- esquema versionado por migrações;
-- carga automática e idempotente;
-- separação entre fonte pública, banco e aplicação;
-- documentação coerente com o comportamento executável do repositório.
-
-## Tecnologias principais
-
-- Python e FastAPI;
-- PostgreSQL e pgvector;
-- Alembic;
-- Redis;
-- SeaweedFS;
-- Docker Compose;
-- MkDocs Material.
-
-## Equipe
-
-| Nome                              | Papel no pipeline de dados                              |
-| --------------------------------- | ------------------------------------------------------- |
-| Lucas Macedo Barboza              | Integrante                                              |
-| Caetano Santos Lucio              | Engenharia de dados, embeddings e runtime do assistente |
-| Cairo Florenço                    | Integrante                                              |
-| Leonardo Sobrinho                 | Integrante                                              |
-| Carlos Eduardo Mendes de Mesquita | Integrante                                              |
-| Bruna                             | Integrante                                              |
-| Lais                              | Integrante                                              |
-
-## Executar o projeto
-
-Requisitos: Docker com Docker Compose e acesso à internet.
+## Executar
 
 ```bash
-cp .env.example .env
+git clone https://github.com/Luckx98/GuiaTCC-UnB.git
+cd GuiaTCC-UnB
 docker compose up --build
 ```
 
-Depois da inicialização:
+O README do repositório traz o modo de carga completa, as consultas de verificação e os testes.
 
-- aplicação: <http://localhost:8000>;
-- documentação da API: <http://localhost:8000/docs>.
+## Equipe
 
-## Entregas da disciplina
+| Nome |
+| --- |
+| Lucas Macedo Barboza |
+| Caetano Santos Lucio |
+| Cairo Florenço |
+| Leonardo Sobrinho |
+| Carlos Eduardo Mendes de Mesquita |
+| Bruna |
+| Lais |
 
-Os requisitos, medições e decisões específicas de cada entrega ficam separados da apresentação geral do projeto. A aba **Entrega 1** reúne a documentação da fonte pública, do esquema físico, das migrações, da carga e da decisão de modelagem.
-
-O código-fonte está disponível no [repositório do projeto](https://github.com/CA1RO/GuiaTCC-UnB).
+O código-fonte está no [repositório do projeto](https://github.com/Luckx98/GuiaTCC-UnB).

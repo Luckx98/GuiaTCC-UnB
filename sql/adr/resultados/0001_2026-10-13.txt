@@ -1,0 +1,37 @@
+# Medição do ADR 0001 — 2026-10-13 10:46:54 -03
+
+== M1. Linhas guardadas por alternativa
+           fonte            | espelho_dos_arquivos | crud_estado_atual | insert_only_versionado 
+----------------------------+----------------------+-------------------+------------------------
+ CNES-ST (estabelecimentos) |              1278737 |             26048 |                  56967
+ CNES-LT (leitos)           |               240132 |              4471 |                 240132
+ SIH-RD (internações)       |              3670019 |           3612699 |                3669874
+
+
+== M2. Espaço em disco (dados + índices)
+                         tabela                         | tamanho 
+--------------------------------------------------------+---------
+ estabelecimento + estabelecimento_versao (insert-only) | 6360 kB
+ crud_estabelecimento (CRUD)                            | 2640 kB
+ leito (insert-only)                                    | 36 MB
+ crud_leito (CRUD)                                      | 416 kB
+
+
+== M3. O que o CRUD não consegue responder (informação perdida ao sobrescrever)
+                                    informacao                                    | quantidade 
+----------------------------------------------------------------------------------+------------
+ mudanças de cadastro de estabelecimento sobrescritas                             |       4871
+ mudanças de gestão municipal/estadual sobrescritas                               |         44
+ retratos mensais de leitos descartados (competências anteriores)                 |     235661
+ registros de longa permanência colapsados numa só AIH                            |      57175
+ internações que chegaram depois do mês de saída (competência de chegada perdida) |    1194613
+
+
+== M4. Latência de consultas de estado atual (mediana de 5 execuções, ms)
+                 consulta                 | insert_only | crud 
+------------------------------------------+-------------+------
+ cadastro atual de um hospital (HRT)      |        0.04 | 0.02
+ estabelecimentos por tipo de gestão hoje |       67.43 | 5.91
+ leitos SUS atuais de um hospital (HRT)   |        1.76 | 0.02
+ leitos SUS atuais por UF                 |      209.33 | 6.12
+

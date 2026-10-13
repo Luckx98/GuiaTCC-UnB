@@ -1,27 +1,30 @@
-# Entrega 1 - Fonte OLTP modelada e populada
+# Entrega 1 — Fonte OLTP modelada e populada
 
-A primeira entrega estabelece a base de dados inicial do GuiaOrientador-UnB. O objetivo é demonstrar que uma fonte pública brasileira pode ser modelada, migrada e carregada automaticamente de maneira reproduzível.
+A E1 coloca de pé o sistema de origem do Leitos SUS-DF: um PostgreSQL com esquema versionado, populado automaticamente com as internações do SIH/SUS e o cadastro de estabelecimentos e leitos do CNES, para o DF e Goiás, de janeiro de 2021 até a última competência publicada.
 
-## Conteúdo da entrega
+## Onde está cada requisito
 
-| Requisito | Onde está documentado |
-| --- | --- |
-| Domínio brasileiro e pergunta de gestão | **Domínio e pergunta** |
-| Esquema físico versionado | **Esquema e migrações** |
-| Carga automática e idempotente | **Carga reproduzível** |
-| Volume superior a uma amostra mínima | **Volume** |
-| Leituras, escritas, acesso e latência | **Caracterização da carga** |
-| Estratégia de atualização e histórico | **Histórico da origem** |
-| Decisão de modelagem medida | **ADR 0001** |
+| Requisito da E1 | Onde está | Evidência no repositório |
+| --- | --- | --- |
+| Domínio e pergunta de gestão em uma frase | [Domínio e pergunta](01-dominio-e-pergunta.md) | — |
+| Esquema versionado com migrações executáveis do zero | [Esquema e migrações](02-esquema-e-migracoes.md) | `alembic/versions/0001`–`0006` |
+| Carga reprodutível com um comando | [Carga reprodutível](03-carga-reprodutivel.md) | `docker-compose.yml`, `loader/`, `dados/amostra/` |
+| Volume que torne a plataforma interessante | [Volume](04-volume.md) | tabela `carga` |
+| Caracterização da carga (passo 1) | [Caracterização da carga](05-caracterizacao-da-carga.md) | `sql/caracterizacao/` |
+| Como a origem trata histórico | [Histórico da origem](06-historico-da-origem.md) | `sql/historico/` |
+| ADR da modelagem da origem | [ADR 0001](../adr/0001-origem-insert-only-versionada-por-competencia.md) | `sql/adr/0001_medicao.sql` |
+| README para subir com Docker Compose | [README](https://github.com/Luckx98/GuiaTCC-UnB#executar-o-projeto) | — |
 
-## Resultado
+## Resultado em números
 
-A fonte selecionada foi o conjunto de docentes da pós-graduação publicado pela CAPES, filtrado para a Universidade de Brasília.
-
-| Conjunto | Registros |
+| Medida | Valor |
 | --- | ---: |
-| Docentes distintos | 2.016 |
-| Programas de pós-graduação | 102 |
-| Vínculos docente–programa–ano | 2.472 |
+| Arquivos públicos carregados | 406 |
+| Internações (SIH/SUS) | 3.669.874 |
+| Linhas de leito por competência (CNES-LT) | 240.132 |
+| Estabelecimentos / versões de cadastro (CNES-ST) | 26.048 / 30.919 |
+| Linhas rejeitadas na validação | 145 (0,004%) |
+| Tempo da carga completa | 14 min 20 s |
+| Tamanho do banco | 1,16 GB |
 
-Use o menu desta aba para consultar cada requisito e sua evidência.
+`docker compose up` sem configuração carrega um recorte versionado (DF, 01/2025) em menos de um minuto e sem acesso à rede. `MODO=completo` baixa o período inteiro do FTP do DATASUS.

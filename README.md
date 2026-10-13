@@ -48,7 +48,7 @@ O projeto combina uma aplicação web com uma pipeline de dados responsável por
 Requisito: Docker com Docker Compose. O arquivo `.env` é opcional, porque o `docker-compose.yml` já tem valores padrão. Para mudar algum valor, copie o `.env.example`.
 
 ```bash
-git clone https://github.com/CA1RO/GuiaTCC-UnB.git
+git clone https://github.com/Luckx98/GuiaTCC-UnB.git
 cd GuiaTCC-UnB
 docker compose up --build
 ```
@@ -103,7 +103,7 @@ docker compose down -v   # apaga o banco e os arquivos baixados
 
 ## Documentação
 
-A documentação completa do projeto, das entregas da disciplina e das decisões de modelagem está no [GitHub Pages do GuiaOrientador-UnB](https://ca1ro.github.io/GuiaTCC-UnB/).
+A documentação completa do projeto, das entregas da disciplina e das decisões de modelagem está no [GitHub Pages do GuiaOrientador-UnB](https://luckx98.github.io/GuiaTCC-UnB/).
 
 Para visualizar o site localmente:
 

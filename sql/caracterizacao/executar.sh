@@ -4,9 +4,9 @@
 # Uso (com o compose no ar e a carga concluída):
 #   sql/caracterizacao/executar.sh
 #
-# Para cada consulta de leitura: mostra as primeiras linhas do resultado e roda
-# EXPLAIN (ANALYZE, BUFFERS) REPETICOES vezes. A primeira execução tende a ler
-# do disco; as seguintes, do cache.
+# Para cada consulta de leitura: mostra as primeiras linhas do resultado, mede o
+# tempo REPETICOES vezes com EXPLAIN (ANALYZE, TIMING OFF) e imprime o plano.
+# A primeira execução tende a ler do disco; as seguintes, do cache.
 set -euo pipefail
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -48,12 +48,14 @@ psql_() {
         echo "-- primeiras linhas do resultado:"
         psql_ -c "SELECT * FROM ($consulta) AS resultado LIMIT 12"
         psql_ -At -c "SELECT '-- linhas no resultado: ' || count(*) FROM ($consulta) AS resultado"
+        # TIMING OFF: cronometrar cada nó do plano pode multiplicar o tempo de
+        # consultas com laços grandes; o tempo total continua sendo medido.
         for i in $(seq 1 "$REPETICOES"); do
-            plano="$(psql_ -At -c "EXPLAIN (ANALYZE, BUFFERS) $consulta")"
-            echo "-- execução $i: $(grep 'Execution Time' <<< "$plano" | sed 's/^ *//')"
+            tempo="$(psql_ -At -c "EXPLAIN (ANALYZE, TIMING OFF) $consulta" | grep 'Execution Time' | sed 's/^ *//')"
+            echo "-- execução $i: $tempo"
         done
-        echo "-- plano da última execução:"
-        echo "$plano"
+        echo "-- plano (EXPLAIN ANALYZE, BUFFERS; tempos por nó incluem o custo da instrumentação):"
+        psql_ -At -c "EXPLAIN (ANALYZE, BUFFERS) $consulta"
         echo
     done
 } | tee "$SAIDA"

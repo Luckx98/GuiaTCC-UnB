@@ -1,8 +1,8 @@
-site_name: GuiaOrientador-UnB
-site_description: Documentação da entrega E1 de Sistemas de Banco de Dados 2
-site_url: https://ca1ro.github.io/GuiaTCC-UnB/
-repo_url: https://github.com/CA1RO/GuiaTCC-UnB
-repo_name: CA1RO/GuiaTCC-UnB
+site_name: Leitos SUS-DF
+site_description: Plataforma de dados sobre ocupação de leitos SUS no DF (Banco de Dados 2, UnB)
+site_url: https://luckx98.github.io/GuiaTCC-UnB/
+repo_url: https://github.com/Luckx98/GuiaTCC-UnB
+repo_name: Luckx98/GuiaTCC-UnB
 edit_uri: edit/main/docs/
 
 theme:
@@ -36,4 +36,4 @@ nav:
       - Volume: e1/04-volume.md
       - Caracterização da carga: e1/05-caracterizacao-da-carga.md
       - Histórico da origem: e1/06-historico-da-origem.md
-      - ADR 0001: adr/0001-modelar-docentes-e-programas-capes.md
+      - ADR 0001: adr/0001-origem-insert-only-versionada-por-competencia.md
